@@ -170,14 +170,8 @@
       trace: 6,
       explosion: 6,
       intensity: 60,
-      brightness: {
-        min: 60,
-        max: 90
-      },
-      decay: {
-        min: 0.01,
-        max: 0.02
-      },
+      brightness: { min: 60, max: 90 },
+      decay: { min: 0.01, max: 0.02 }
     });
 
     spinBtn.onclick = () => {
@@ -185,10 +179,10 @@
       spinBtn.disabled = true;
 
       const slotHeight = 50;
-      const visibleSlotIndex = 1;
+      const visibleSlotIndex = 1; // второй слот (по вертикали)
       const totalSlots = reel.children.length;
 
-      // Гарантированно выбираем ближайший ШАНС Х2 так, чтобы он оказался во втором слоте
+      // ищем ближайший ШАНС Х2, чтобы он попал во второй слот
       let targetIndex = -1;
       for (let i = visibleSlotIndex; i < totalSlots - 2; i++) {
         if (reel.children[i].innerText.trim() === "ШАНС Х2") {
@@ -196,12 +190,11 @@
           break;
         }
       }
-
       if (targetIndex === -1) targetIndex = totalSlots - 1;
 
       const offset = -(targetIndex - visibleSlotIndex) * slotHeight;
 
-      reel.style.transition = "transform 12s cubic-bezier(0.2, 0.9, 0.3, 1)";
+      reel.style.transition = "transform 10s cubic-bezier(0.2, 0.9, 0.3, 1)";
       reel.style.transform = `translateY(${offset}px)`;
 
       setTimeout(() => {
@@ -209,11 +202,8 @@
         claimBtn.style.display = "inline-block";
         spinBtn.style.display = "none";
         promoText.style.display = "block";
-
-        setTimeout(() => {
-          fw.stop();
-        }, 4000);
-      }, 12000);
+        setTimeout(() => fw.stop(), 4000);
+      }, 10000);
 
       attemptsEl.innerText = "0";
     };
