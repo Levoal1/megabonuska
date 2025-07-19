@@ -147,19 +147,6 @@
     const promoText = document.getElementById("promo-text");
     const attemptsEl = document.getElementById("attempts");
 
-    const createSlots = () => {
-      reel.innerHTML = '';
-      for (let i = 0; i < 200; i++) {
-        const prize = allPrizes[i % allPrizes.length];
-        const item = document.createElement("div");
-        item.className = "slot-item";
-        item.innerText = prize;
-        reel.appendChild(item);
-      }
-    };
-
-    createSlots();
-
     const fw = new Fireworks.default(fireworksEl, {
       autoresize: true,
       opacity: 0.9,
@@ -181,21 +168,31 @@
       const slotHeight = 50;
       const visibleSlotIndex = 1;
       const totalPrizes = allPrizes.length;
-      const fullRotations = 4;
+      const fullRotations = 8;
+      const additionalOffset = 10;
 
-      // Гарантируем: 4 оборота + выпадет ШАНС Х2
-      let targetIndex = -1;
-      const startIndex = fullRotations * totalPrizes;
+      const totalSteps = (fullRotations * totalPrizes) + additionalOffset;
 
-      for (let i = startIndex; i < reel.children.length - 2; i++) {
-        if (reel.children[i].innerText.trim() === "ШАНС Х2") {
-          targetIndex = i;
-          break;
-        }
+      // Сначала сбросим барабан
+      reel.innerHTML = '';
+
+      // Заполним прокрутку — много призов
+      for (let i = 0; i < totalSteps; i++) {
+        const prize = allPrizes[i % totalPrizes];
+        const item = document.createElement("div");
+        item.className = "slot-item";
+        item.innerText = prize;
+        reel.appendChild(item);
       }
 
-      if (targetIndex === -1) targetIndex = reel.children.length - 1;
+      // Финально добавим "ШАНС Х2" для выпадения
+      const finalPrize = document.createElement("div");
+      finalPrize.className = "slot-item";
+      finalPrize.innerText = "ШАНС Х2";
+      reel.appendChild(finalPrize);
 
+      // Вычисляем смещение
+      const targetIndex = reel.children.length - 1;
       const offset = -(targetIndex - visibleSlotIndex) * slotHeight;
 
       reel.style.transition = "transform 10s cubic-bezier(0.2, 0.9, 0.3, 1)";
