@@ -40,10 +40,10 @@
 
     .arrow {
       position: absolute;
-      right: -25px;
+      left: -35px;
       top: 50%;
-      transform: translateY(-50%);
-      font-size: 28px;
+      transform: translateY(-50%) rotate(90deg);
+      font-size: 30px;
       color: gold;
       animation: blink 1s infinite;
     }
@@ -133,7 +133,7 @@
 
     const createSlots = () => {
       reel.innerHTML = '';
-      for (let i = 0; i < 30; i++) {
+      for (let i = 0; i < 40; i++) {
         const item = document.createElement("div");
         item.className = "slot-item";
         item.innerText = prizes[i % prizes.length];
@@ -147,11 +147,20 @@
       if (parseInt(attemptsEl.innerText) <= 0) return;
       spinBtn.disabled = true;
 
-      const spinCount = 30;
-      const targetIndex = [...Array(spinCount).keys()].reverse().find(i => prizes[i % prizes.length] === "ШАНС Х2");
-      const offset = -(targetIndex - 1) * 50;
+      const spinCount = 40;
+      const targetPrize = "ШАНС Х2";
+      let targetIndex = -1;
+      for (let i = spinCount - 1; i >= 0; i--) {
+        if (prizes[i % prizes.length] === targetPrize) {
+          targetIndex = i;
+          break;
+        }
+      }
 
-      reel.style.transition = "transform 7s cubic-bezier(0.2, 0.9, 0.3, 1)";
+      const visibleSlotIndex = 1; // 0 - верхний, 1 - центральный, 2 - нижний
+      const offset = -(targetIndex - visibleSlotIndex) * 50;
+
+      reel.style.transition = "transform 10s cubic-bezier(0.2, 0.9, 0.3, 1)";
       reel.style.transform = `translateY(${offset}px)`;
 
       setTimeout(() => {
@@ -161,7 +170,7 @@
         setTimeout(() => {
           fireworks.style.display = "none";
         }, 4000);
-      }, 7000);
+      }, 10000);
 
       attemptsEl.innerText = "0";
     };
