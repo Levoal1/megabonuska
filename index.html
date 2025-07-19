@@ -40,10 +40,10 @@
 
     .arrow {
       position: absolute;
-      left: -35px;
       top: 50%;
-      transform: translateY(-50%) rotate(90deg);
-      font-size: 30px;
+      left: 50%;
+      transform: translate(-50%, -100%) rotate(90deg);
+      font-size: 28px;
       color: gold;
       animation: blink 1s infinite;
       z-index: 10;
@@ -51,13 +51,13 @@
 
     @keyframes blink {
       0%, 100% { opacity: 1; }
-      50% { opacity: 0.5; }
+      50% { opacity: 0.4; }
     }
 
     .reel {
       position: absolute;
       width: 100%;
-      transition: transform 12s cubic-bezier(0.2, 0.9, 0.3, 1);
+      top: 0;
     }
 
     .slot-item {
@@ -86,13 +86,18 @@
 
     .fireworks {
       position: fixed;
+      width: 100vw;
+      height: 100vh;
+      top: 0;
+      left: 0;
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    .fireworks canvas {
       width: 100%;
       height: 100%;
-      top: 0; left: 0;
-      background: rgba(0,0,0,0.6) url('https://i.imgur.com/SyoTu0J.gif') center center no-repeat;
-      background-size: cover;
-      display: none;
-      z-index: 9999;
+      display: block;
     }
   </style>
 </head>
@@ -101,7 +106,7 @@
   <div id="chances">У вас попыток: <span id="attempts">1</span></div>
 
   <div class="slot-container">
-    <div class="arrow">➤</div>
+    <div class="arrow">⬇</div>
     <div class="reel" id="reel"></div>
   </div>
 
@@ -110,6 +115,7 @@
 
   <div class="fireworks" id="fireworks"></div>
 
+  <script src="https://cdn.jsdelivr.net/npm/fireworks-js@2.10.3/dist/index.umd.js"></script>
   <script>
     Telegram.WebApp.ready();
     Telegram.WebApp.expand();
@@ -129,12 +135,12 @@
     const reel = document.getElementById("reel");
     const spinBtn = document.getElementById("spinBtn");
     const claimBtn = document.getElementById("claimBtn");
-    const fireworks = document.getElementById("fireworks");
+    const fireworksEl = document.getElementById("fireworks");
     const attemptsEl = document.getElementById("attempts");
 
     const createSlots = () => {
       reel.innerHTML = '';
-      for (let i = 0; i < 60; i++) {
+      for (let i = 0; i < 100; i++) {
         const item = document.createElement("div");
         item.className = "slot-item";
         item.innerText = prizes[i % prizes.length];
@@ -144,17 +150,36 @@
 
     createSlots();
 
+    const fw = new Fireworks.default(fireworksEl, {
+      autoresize: true,
+      opacity: 0.8,
+      acceleration: 1.05,
+      friction: 0.95,
+      gravity: 1.5,
+      particles: 80,
+      trace: 3,
+      explosion: 5,
+      intensity: 20,
+      brightness: {
+        min: 50,
+        max: 80
+      },
+      decay: {
+        min: 0.015,
+        max: 0.03
+      },
+    });
+
     spinBtn.onclick = () => {
       if (parseInt(attemptsEl.innerText) <= 0) return;
       spinBtn.disabled = true;
 
       const slotHeight = 50;
-      const visibleSlotIndex = 1; // центральный слот (второй)
+      const visibleSlotIndex = 1;
       const targetPrize = "ШАНС Х2";
-
-      let targetIndex = -1;
       const totalSlots = reel.children.length;
 
+      let targetIndex = -1;
       for (let i = totalSlots - 1; i >= 0; i--) {
         if (reel.children[i].innerText.trim() === targetPrize) {
           targetIndex = i;
@@ -170,12 +195,12 @@
       reel.style.transform = `translateY(${offset}px)`;
 
       setTimeout(() => {
-        fireworks.style.display = "block";
+        fw.start();
         claimBtn.style.display = "inline-block";
         spinBtn.style.display = "none";
 
         setTimeout(() => {
-          fireworks.style.display = "none";
+          fw.stop();
         }, 4000);
       }, 12000);
 
