@@ -149,7 +149,7 @@
 
     const createSlots = () => {
       reel.innerHTML = '';
-      for (let i = 0; i < 100; i++) {
+      for (let i = 0; i < 200; i++) {
         const prize = allPrizes[i % allPrizes.length];
         const item = document.createElement("div");
         item.className = "slot-item";
@@ -179,18 +179,22 @@
       spinBtn.disabled = true;
 
       const slotHeight = 50;
-      const visibleSlotIndex = 1; // второй слот (по вертикали)
-      const totalSlots = reel.children.length;
+      const visibleSlotIndex = 1;
+      const totalPrizes = allPrizes.length;
+      const fullRotations = 4;
 
-      // ищем ближайший ШАНС Х2, чтобы он попал во второй слот
+      // Гарантируем: 4 оборота + выпадет ШАНС Х2
       let targetIndex = -1;
-      for (let i = visibleSlotIndex; i < totalSlots - 2; i++) {
+      const startIndex = fullRotations * totalPrizes;
+
+      for (let i = startIndex; i < reel.children.length - 2; i++) {
         if (reel.children[i].innerText.trim() === "ШАНС Х2") {
           targetIndex = i;
           break;
         }
       }
-      if (targetIndex === -1) targetIndex = totalSlots - 1;
+
+      if (targetIndex === -1) targetIndex = reel.children.length - 1;
 
       const offset = -(targetIndex - visibleSlotIndex) * slotHeight;
 
