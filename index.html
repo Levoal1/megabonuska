@@ -46,6 +46,7 @@
       font-size: 30px;
       color: gold;
       animation: blink 1s infinite;
+      z-index: 10;
     }
 
     @keyframes blink {
@@ -56,7 +57,7 @@
     .reel {
       position: absolute;
       width: 100%;
-      animation-fill-mode: forwards;
+      transition: transform 12s cubic-bezier(0.2, 0.9, 0.3, 1);
     }
 
     .slot-item {
@@ -88,10 +89,10 @@
       width: 100%;
       height: 100%;
       top: 0; left: 0;
-      background: url('https://i.imgur.com/SyoTu0J.gif') center center no-repeat;
+      background: rgba(0,0,0,0.6) url('https://i.imgur.com/SyoTu0J.gif') center center no-repeat;
       background-size: cover;
       display: none;
-      z-index: 999;
+      z-index: 9999;
     }
   </style>
 </head>
@@ -133,7 +134,7 @@
 
     const createSlots = () => {
       reel.innerHTML = '';
-      for (let i = 0; i < 40; i++) {
+      for (let i = 0; i < 60; i++) {
         const item = document.createElement("div");
         item.className = "slot-item";
         item.innerText = prizes[i % prizes.length];
@@ -147,30 +148,36 @@
       if (parseInt(attemptsEl.innerText) <= 0) return;
       spinBtn.disabled = true;
 
-      const spinCount = 40;
+      const slotHeight = 50;
+      const visibleSlotIndex = 1; // центральный слот (второй)
       const targetPrize = "ШАНС Х2";
+
       let targetIndex = -1;
-      for (let i = spinCount - 1; i >= 0; i--) {
-        if (prizes[i % prizes.length] === targetPrize) {
+      const totalSlots = reel.children.length;
+
+      for (let i = totalSlots - 1; i >= 0; i--) {
+        if (reel.children[i].innerText.trim() === targetPrize) {
           targetIndex = i;
           break;
         }
       }
 
-      const visibleSlotIndex = 1; // 0 - верхний, 1 - центральный, 2 - нижний
-      const offset = -(targetIndex - visibleSlotIndex) * 50;
+      if (targetIndex === -1) targetIndex = totalSlots - 3;
 
-      reel.style.transition = "transform 10s cubic-bezier(0.2, 0.9, 0.3, 1)";
+      const offset = -(targetIndex - visibleSlotIndex) * slotHeight;
+
+      reel.style.transition = "transform 12s cubic-bezier(0.2, 0.9, 0.3, 1)";
       reel.style.transform = `translateY(${offset}px)`;
 
       setTimeout(() => {
         fireworks.style.display = "block";
         claimBtn.style.display = "inline-block";
         spinBtn.style.display = "none";
+
         setTimeout(() => {
           fireworks.style.display = "none";
         }, 4000);
-      }, 10000);
+      }, 12000);
 
       attemptsEl.innerText = "0";
     };
