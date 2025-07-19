@@ -128,7 +128,7 @@
     Telegram.WebApp.ready();
     Telegram.WebApp.expand();
 
-    const prizes = [
+    const allPrizes = [
       "ШАНС Х2",
       "25 FP",
       "+500% К ДЕПОЗИТУ",
@@ -150,9 +150,10 @@
     const createSlots = () => {
       reel.innerHTML = '';
       for (let i = 0; i < 100; i++) {
+        const prize = allPrizes[i % allPrizes.length];
         const item = document.createElement("div");
         item.className = "slot-item";
-        item.innerText = prizes[i % prizes.length];
+        item.innerText = prize;
         reel.appendChild(item);
       }
     };
@@ -187,8 +188,9 @@
       const visibleSlotIndex = 1;
       const totalSlots = reel.children.length;
 
+      // Гарантированно выбираем ближайший ШАНС Х2 так, чтобы он оказался во втором слоте
       let targetIndex = -1;
-      for (let i = totalSlots - 1; i >= 0; i--) {
+      for (let i = visibleSlotIndex; i < totalSlots - 2; i++) {
         if (reel.children[i].innerText.trim() === "ШАНС Х2") {
           targetIndex = i;
           break;
