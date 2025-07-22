@@ -129,7 +129,6 @@
     Telegram.WebApp.expand();
 
     const allPrizes = [
-      "ШАНС Х2",
       "25 FP",
       "+500% К ДЕПОЗИТУ",
       "БОНУСКА ЗА 30.000₽",
@@ -140,6 +139,8 @@
       "50FP"
     ];
 
+    const guaranteedPrize = "ШАНС Х2";
+
     const reel = document.getElementById("reel");
     const spinBtn = document.getElementById("spinBtn");
     const claimBtn = document.getElementById("claimBtn");
@@ -148,7 +149,7 @@
     const attemptsEl = document.getElementById("attempts");
 
     const slotHeight = 50;
-    const visibleSlotIndex = 1; // слот под стрелкой
+    const visibleSlotIndex = 1;
     const fullRotations = 8;
     const extraItems = 10;
 
@@ -166,17 +167,20 @@
       decay: { min: 0.01, max: 0.02 }
     });
 
-    // Генерация барабана с гарантией ШАНС Х2 под стрелкой
+    const shuffle = arr => [...arr].sort(() => Math.random() - 0.5);
+
     const buildReelWithGuaranteedWin = () => {
       const prizes = [];
       const steps = (fullRotations * allPrizes.length) + extraItems;
 
       for (let i = 0; i < steps; i++) {
-        prizes.push(allPrizes[i % allPrizes.length]);
+        const randomPrize = allPrizes[Math.floor(Math.random() * allPrizes.length)];
+        prizes.push(randomPrize);
       }
 
-      const insertIndex = steps + visibleSlotIndex;
-      prizes.splice(insertIndex, 0, "ШАНС Х2");
+      // Вставляем "ШАНС Х2" так, чтобы оказался во втором слоте
+      const insertIndex = prizes.length;
+      prizes.splice(insertIndex, 0, guaranteedPrize); // добавляем в конец
 
       reel.innerHTML = '';
       prizes.forEach(prize => {
@@ -189,7 +193,7 @@
       return insertIndex;
     };
 
-    // Показываем барабан сразу при загрузке
+    // Показываем слоты при загрузке
     buildReelWithGuaranteedWin();
 
     spinBtn.onclick = () => {
