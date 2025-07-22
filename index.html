@@ -123,4 +123,99 @@
   <div id="promo-text">Сделайте депозит на 1WIN от 2.000₽ и получите ШАНС Х2</div>
   <div class="fireworks" id="fireworks"></div>
 
-  <script src="https://cdn.jsdelivr.net/npm/firework
+  <script src="https://cdn.jsdelivr.net/npm/fireworks-js@2.10.3/dist/index.umd.js"></script>
+  <script>
+    Telegram.WebApp.ready();
+    Telegram.WebApp.expand();
+
+    const allPrizes = [
+      "ШАНС Х2",
+      "25 FP",
+      "+500% К ДЕПОЗИТУ",
+      "БОНУСКА ЗА 30.000₽",
+      "+220% К ДЕПОЗИТУ",
+      "ВАУЧЕР НА 10.000₽",
+      "500FP",
+      "БОНУСКА ЗА 10.000₽",
+      "50FP"
+    ];
+
+    const reel = document.getElementById("reel");
+    const spinBtn = document.getElementById("spinBtn");
+    const claimBtn = document.getElementById("claimBtn");
+    const fireworksEl = document.getElementById("fireworks");
+    const promoText = document.getElementById("promo-text");
+    const attemptsEl = document.getElementById("attempts");
+
+    const slotHeight = 50;
+    const visibleSlotIndex = 1; // слот под стрелкой
+    const fullRotations = 8;
+    const extraItems = 10;
+
+    const fw = new Fireworks.default(fireworksEl, {
+      autoresize: true,
+      opacity: 0.9,
+      acceleration: 1.1,
+      friction: 0.95,
+      gravity: 1.5,
+      particles: 480,
+      trace: 6,
+      explosion: 6,
+      intensity: 60,
+      brightness: { min: 60, max: 90 },
+      decay: { min: 0.01, max: 0.02 }
+    });
+
+    // Генерация барабана с гарантией ШАНС Х2 под стрелкой
+    const buildReelWithGuaranteedWin = () => {
+      const prizes = [];
+      const steps = (fullRotations * allPrizes.length) + extraItems;
+
+      for (let i = 0; i < steps; i++) {
+        prizes.push(allPrizes[i % allPrizes.length]);
+      }
+
+      const insertIndex = steps + visibleSlotIndex;
+      prizes.splice(insertIndex, 0, "ШАНС Х2");
+
+      reel.innerHTML = '';
+      prizes.forEach(prize => {
+        const div = document.createElement("div");
+        div.className = "slot-item";
+        div.innerText = prize;
+        reel.appendChild(div);
+      });
+
+      return insertIndex;
+    };
+
+    // Показываем барабан сразу при загрузке
+    buildReelWithGuaranteedWin();
+
+    spinBtn.onclick = () => {
+      if (parseInt(attemptsEl.innerText) <= 0) return;
+      spinBtn.disabled = true;
+
+      const targetIndex = buildReelWithGuaranteedWin();
+      const offset = -(targetIndex - visibleSlotIndex) * slotHeight;
+
+      reel.style.transition = "transform 10s cubic-bezier(0.2, 0.9, 0.3, 1)";
+      reel.style.transform = `translateY(${offset}px)`;
+
+      setTimeout(() => {
+        fw.start();
+        claimBtn.style.display = "inline-block";
+        spinBtn.style.display = "none";
+        promoText.style.display = "block";
+        setTimeout(() => fw.stop(), 4000);
+      }, 10000);
+
+      attemptsEl.innerText = "0";
+    };
+
+    claimBtn.onclick = () => {
+      window.location.href = "https://lkhq.cc/24e8";
+    };
+  </script>
+</body>
+</html>
