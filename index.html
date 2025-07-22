@@ -147,6 +147,12 @@
     const promoText = document.getElementById("promo-text");
     const attemptsEl = document.getElementById("attempts");
 
+    const slotHeight = 50;
+    const visibleSlotIndex = 1;
+    const totalPrizes = allPrizes.length;
+    const fullRotations = 8;
+    const additionalOffset = 10;
+
     const fw = new Fireworks.default(fireworksEl, {
       autoresize: true,
       opacity: 0.9,
@@ -161,22 +167,28 @@
       decay: { min: 0.01, max: 0.02 }
     });
 
+    // 🔄 Генерация базового барабана при старте
+    const generateInitialSlots = () => {
+      reel.innerHTML = '';
+      for (let i = 0; i < 15; i++) {
+        const prize = allPrizes[i % totalPrizes];
+        const item = document.createElement("div");
+        item.className = "slot-item";
+        item.innerText = prize;
+        reel.appendChild(item);
+      }
+    };
+
+    generateInitialSlots();
+
     spinBtn.onclick = () => {
       if (parseInt(attemptsEl.innerText) <= 0) return;
       spinBtn.disabled = true;
 
-      const slotHeight = 50;
-      const visibleSlotIndex = 1;
-      const totalPrizes = allPrizes.length;
-      const fullRotations = 8;
-      const additionalOffset = 10;
-
       const totalSteps = (fullRotations * totalPrizes) + additionalOffset;
 
-      // Сначала сбросим барабан
+      // Очищаем и пересоздаём барабан
       reel.innerHTML = '';
-
-      // Заполним прокрутку — много призов
       for (let i = 0; i < totalSteps; i++) {
         const prize = allPrizes[i % totalPrizes];
         const item = document.createElement("div");
@@ -185,13 +197,12 @@
         reel.appendChild(item);
       }
 
-      // Финально добавим "ШАНС Х2" для выпадения
+      // ⛔ Добавляем в финале гарантированное ШАНС Х2
       const finalPrize = document.createElement("div");
       finalPrize.className = "slot-item";
       finalPrize.innerText = "ШАНС Х2";
       reel.appendChild(finalPrize);
 
-      // Вычисляем смещение
       const targetIndex = reel.children.length - 1;
       const offset = -(targetIndex - visibleSlotIndex) * slotHeight;
 
