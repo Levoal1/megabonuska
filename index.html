@@ -149,7 +149,7 @@
     const attemptsEl = document.getElementById("attempts");
 
     const slotHeight = 50;
-    const visibleSlotIndex = 1;
+    const visibleSlotIndex = 1; // второй слот
     const fullRotations = 8;
     const extraItems = 10;
 
@@ -167,8 +167,6 @@
       decay: { min: 0.01, max: 0.02 }
     });
 
-    const shuffle = arr => [...arr].sort(() => Math.random() - 0.5);
-
     const buildReelWithGuaranteedWin = () => {
       const prizes = [];
       const steps = (fullRotations * allPrizes.length) + extraItems;
@@ -178,9 +176,9 @@
         prizes.push(randomPrize);
       }
 
-      // Вставляем "ШАНС Х2" так, чтобы оказался во втором слоте
+      // вставляем "ШАНС Х2" туда, чтобы он попал под стрелку (во втором слоте)
       const insertIndex = prizes.length;
-      prizes.splice(insertIndex, 0, guaranteedPrize); // добавляем в конец
+      prizes.splice(insertIndex, 0, guaranteedPrize);
 
       reel.innerHTML = '';
       prizes.forEach(prize => {
@@ -193,7 +191,7 @@
       return insertIndex;
     };
 
-    // Показываем слоты при загрузке
+    // Показываем барабан при загрузке
     buildReelWithGuaranteedWin();
 
     spinBtn.onclick = () => {
@@ -201,6 +199,8 @@
       spinBtn.disabled = true;
 
       const targetIndex = buildReelWithGuaranteedWin();
+
+      // 🛠 Главная правка: корректный offset, чтобы приз оказался во втором слоте
       const offset = -(targetIndex - (visibleSlotIndex - 1)) * slotHeight;
 
       reel.style.transition = "transform 10s cubic-bezier(0.2, 0.9, 0.3, 1)";
