@@ -148,10 +148,9 @@
     const attemptsEl = document.getElementById("attempts");
 
     const slotHeight = 50;
-    const visibleSlotIndex = 1;
-    const totalPrizes = allPrizes.length;
+    const visibleSlotIndex = 1; // всегда второй слот
     const fullRotations = 8;
-    const additionalOffset = 10;
+    const extraItems = 10;
 
     const fw = new Fireworks.default(fireworksEl, {
       autoresize: true,
@@ -167,41 +166,35 @@
       decay: { min: 0.01, max: 0.02 }
     });
 
-    // 🔄 Генерация базового барабана при старте
-    const generateInitialSlots = () => {
-      reel.innerHTML = '';
-      for (let i = 0; i < 15; i++) {
-        const prize = allPrizes[i % totalPrizes];
-        const item = document.createElement("div");
-        item.className = "slot-item";
-        item.innerText = prize;
-        reel.appendChild(item);
+    // 🧱 Построение ленты с гарантией ШАНС Х2 в конце
+    const buildReel = () => {
+      const prizes = [];
+
+      const steps = (fullRotations * allPrizes.length) + extraItems;
+      for (let i = 0; i < steps; i++) {
+        prizes.push(allPrizes[i % allPrizes.length]);
       }
+
+      prizes.push("ШАНС Х2"); // гарантированный результат
+
+      // очищаем и заполняем reel
+      reel.innerHTML = '';
+      prizes.forEach(prize => {
+        const div = document.createElement("div");
+        div.className = "slot-item";
+        div.innerText = prize;
+        reel.appendChild(div);
+      });
     };
 
-    generateInitialSlots();
+    // Показать слоты сразу при загрузке
+    buildReel();
 
     spinBtn.onclick = () => {
       if (parseInt(attemptsEl.innerText) <= 0) return;
       spinBtn.disabled = true;
 
-      const totalSteps = (fullRotations * totalPrizes) + additionalOffset;
-
-      // Очищаем и пересоздаём барабан
-      reel.innerHTML = '';
-      for (let i = 0; i < totalSteps; i++) {
-        const prize = allPrizes[i % totalPrizes];
-        const item = document.createElement("div");
-        item.className = "slot-item";
-        item.innerText = prize;
-        reel.appendChild(item);
-      }
-
-      // ⛔ Добавляем в финале гарантированное ШАНС Х2
-      const finalPrize = document.createElement("div");
-      finalPrize.className = "slot-item";
-      finalPrize.innerText = "ШАНС Х2";
-      reel.appendChild(finalPrize);
+      buildReel(); // перестроим барабан с гарантией ШАНС Х2
 
       const targetIndex = reel.children.length - 1;
       const offset = -(targetIndex - visibleSlotIndex) * slotHeight;
