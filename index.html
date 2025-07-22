@@ -1,4 +1,5 @@
 
+```html
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -107,7 +108,7 @@
   <button id="spinBtn">КРУТИТЬ</button>
   <button class="claim-btn" id="claimBtn">ЗАБРАТЬ</button>
 
-  <div id="promo-text">Сделайте депозит на 1WIN от 2 000₽ и получите ШАНС Х2</div>
+  <div id="promo-text">Сделайте депозит на 1WIN от 2 000 ₽ и получите ШАНС X2</div>
   <div class="fireworks" id="fireworks"></div>
 
   <script src="https://cdn.jsdelivr.net/npm/fireworks-js@2.10.3/dist/index.umd.js"></script>
@@ -115,7 +116,7 @@
     Telegram.WebApp.ready();
     Telegram.WebApp.expand();
 
-    const allPrizes = [
+    const allPrizes     = [
       "25 FP",
       "+500% К ДЕПОЗИТУ",
       "БОНУСКА ЗА 30 000₽",
@@ -126,10 +127,9 @@
       "50 FP"
     ];
     const guaranteedPrize = "ШАНС Х2";
-
     const fullRotations    = 4;
     const slotHeight       = 50;
-    const visibleSlotIndex = 1; // второй слот
+    const visibleSlotIndex = 1; // второй слот (центральный)
 
     const reel       = document.getElementById("reel");
     const spinBtn    = document.getElementById("spinBtn");
@@ -144,19 +144,25 @@
       brightness: { min: 60, max: 90 }, decay: { min: 0.01, max: 0.02 }
     });
 
-    // Строим ленту: 4 полных оборота рандомных призов + 1 гарантированный + 1 заполнитель
+    // При загрузке — показываем первые 3 призa
+    function initReel() {
+      reel.innerHTML = "";
+      for (let i = 0; i < 3; i++) {
+        const div = document.createElement("div");
+        div.className = "slot-item";
+        div.innerText = allPrizes[i % allPrizes.length];
+        reel.appendChild(div);
+      }
+    }
+    initReel();
+
+    // Строит полный список: 4 оборота + гарантированный приз
     function buildReel() {
       const prizes = [];
-      // 4 полных оборота
-      for (let i = 0; i < fullRotations; i++) {
-        // для визуального разнообразия — берем все призы последовательно
+      for (let r = 0; r < fullRotations; r++) {
         prizes.push(...allPrizes);
       }
-      // вставляем ШАНС Х2
-      const insertIndex = prizes.length;
-      prizes.splice(insertIndex, 0, guaranteedPrize);
-      // добавляем 1 заполнитель, чтобы не было пустоты
-      prizes.splice(insertIndex + 1, 0, allPrizes[Math.floor(Math.random() * allPrizes.length)]);
+      prizes.push(guaranteedPrize);
 
       reel.innerHTML = "";
       prizes.forEach(p => {
@@ -165,18 +171,23 @@
         div.innerText = p;
         reel.appendChild(div);
       });
-      return insertIndex;
+      // возвращаем индекс гарантированного приза
+      return prizes.length - 1;
     }
-
-    // Показываем изначальный барабан
-    buildReel();
 
     spinBtn.onclick = () => {
       if (+attemptsEl.innerText <= 0) return;
       spinBtn.disabled = true;
 
+      // Сброс перед анимацией
+      reel.style.transition = "none";
+      reel.style.transform  = "translateY(0)";
+      // Строим барабан
       const targetIndex = buildReel();
-      // корректный сдвиг, чтобы индекс targetIndex оказался во 2-м слоте
+      // Принудительный reflow
+      void reel.offsetWidth;
+
+      // Считаем смещение так, чтобы targetIndex оказался в visibleSlotIndex
       const offset = -(targetIndex - visibleSlotIndex) * slotHeight;
 
       reel.style.transition = "transform 10s cubic-bezier(0.2,0.9,0.3,1)";
@@ -199,3 +210,4 @@
   </script>
 </body>
 </html>
+```
