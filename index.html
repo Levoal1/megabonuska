@@ -4,19 +4,18 @@
 <head>
   <meta charset="UTF-8" />
   <title>МЕГА БОНУСКА</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
     body {
       margin: 0; padding: 0;
-      font-family: 'Arial Black', sans-serif;
+      font-family: 'Arial Black',sans-serif;
       background: #111; color: #fff;
       text-align: center;
     }
     h1 {
       margin: 20px 0 10px;
-      font-size: 28px;
-      color: gold;
+      font-size: 28px; color: gold;
     }
     #chances {
       font-size: 20px;
@@ -55,7 +54,6 @@
       border-top: 1px solid #444;
     }
     button {
-      display: inline-block;
       margin: 20px 10px 0;
       padding: 10px 25px;
       font-size: 20px;
@@ -108,7 +106,8 @@
     Telegram.WebApp.ready();
     Telegram.WebApp.expand();
 
-    const allPrizes       = [
+    // Список всех призов кроме гарантированного
+    const allPrizes = [
       "25 FP",
       "+500% К ДЕПОЗИТУ",
       "БОНУСКА ЗА 30 000₽",
@@ -120,9 +119,9 @@
     ];
     const guaranteedPrize = "ШАНС Х2";
 
-    const fullRotations    = 4;
-    const slotHeight       = 50;
-    const visibleSlotIndex = 1; // второй слот (0,1,2)
+    const fullRotations    = 4;   // сколько полных прессов
+    const slotHeight       = 50;  // высота одного слота
+    const visibleSlotIndex = 1;   // второй слот (0-й,1-й,2-й)
 
     const reel       = document.getElementById("reel");
     const spinBtn    = document.getElementById("spinBtn");
@@ -131,73 +130,72 @@
     const attemptsEl = document.getElementById("attempts");
     const fwEl       = document.getElementById("fireworks");
 
-    // Fireworks-js
+    // Инициализируем фейерверки
     const fw = new Fireworks.default(fwEl, {
-      autoresize: true, opacity: 0.9, acceleration: 1.1, friction: 0.95,
-      gravity: 1.5, particles: 480, trace: 6, explosion: 6, intensity: 60,
-      brightness: { min: 60, max: 90 }, decay: { min: 0.01, max: 0.02 }
+      autoresize: true,
+      opacity: 0.9,
+      acceleration: 1.1,
+      friction: 0.95,
+      gravity: 1.5,
+      particles: 480,
+      trace: 6,
+      explosion: 6,
+      intensity: 60,
+      brightness: { min: 60, max: 90 },
+      decay: { min: 0.01, max: 0.02 }
     });
 
-    // Показать 3 первых призa до старта
-    function initReel() {
-      reel.innerHTML = "";
-      for (let i = 0; i < 3; i++) {
-        const div = document.createElement("div");
-        div.className = "slot-item";
-        div.innerText = allPrizes[i % allPrizes.length];
-        reel.appendChild(div);
-      }
+    // Строим один раз «ленты» барабана: 4 полных оборота + гарантированный приз
+    const prizesList = [];
+    for (let i = 0; i < fullRotations; i++) {
+      prizesList.push(...allPrizes);
     }
-    initReel();
+    prizesList.push(guaranteedPrize);
 
-    // Собирает fullRotations полных оборотов + GUARANTEE
-    function buildReel() {
-      const prizes = [];
-      for (let r = 0; r < fullRotations; r++) {
-        prizes.push(...allPrizes);
-      }
-      prizes.push(guaranteedPrize);
-      reel.innerHTML = "";
-      prizes.forEach(p => {
-        const div = document.createElement("div");
-        div.className = "slot-item";
-        div.innerText = p;
+    // Отрисовка барабана на странице
+    function renderReel() {
+      reel.innerHTML = '';
+      prizesList.forEach(prize => {
+        const div = document.createElement('div');
+        div.className = 'slot-item';
+        div.innerText = prize;
         reel.appendChild(div);
       });
-      return prizes.length - 1;
     }
+    renderReel();
 
     spinBtn.onclick = () => {
       if (+attemptsEl.innerText <= 0) return;
       spinBtn.disabled = true;
 
-      // 1) перестраиваем барабан
-      const targetIndex = buildReel();
-      // 2) сброс позиции перед анимацией
-      reel.style.transition = "none";
-      reel.style.transform  = "translateY(0)";
-      // принудительный reflow
+      // Сброс позиции
+      reel.style.transition = 'none';
+      reel.style.transform  = 'translateY(0)';
+      // Принудительный reflow
       void reel.offsetWidth;
-      // 3) вычисляем offset: visibleSlotIndex*slotHeight — targetIndex*slotHeight
-      const offset = (visibleSlotIndex - targetIndex) * slotHeight;
-      // 4) анимация
-      reel.style.transition = "transform 10s cubic-bezier(0.2,0.9,0.3,1)";
+
+      // Вычисляем смещение так, чтобы последний элемент (ШАНС Х2) оказался во 2-м слоте
+      const targetIndex = prizesList.length - 1;
+      const offset = -(targetIndex - visibleSlotIndex) * slotHeight;
+
+      // Запускаем анимацию 10 секунд
+      reel.style.transition = 'transform 10s cubic-bezier(0.2,0.9,0.3,1)';
       reel.style.transform  = `translateY(${offset}px)`;
 
-      // 5) по завершении
+      // После прокрутки показываем фейерверки, кнопку и текст
       setTimeout(() => {
         fw.start();
-        claimBtn.style.display  = "inline-block";
-        spinBtn.style.display   = "none";
-        promoText.style.display = "block";
+        claimBtn.style.display  = 'inline-block';
+        spinBtn.style.display   = 'none';
+        promoText.style.display = 'block';
         setTimeout(() => fw.stop(), 4000);
       }, 10000);
 
-      attemptsEl.innerText = "0";
+      attemptsEl.innerText = '0';
     };
 
     claimBtn.onclick = () => {
-      window.location.href = "https://lkhq.cc/24e8";
+      window.location.href = 'https://lkhq.cc/24e8';
     };
   </script>
 </body>
