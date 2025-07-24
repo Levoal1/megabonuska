@@ -4,31 +4,28 @@
 <head>
   <meta charset="UTF-8" />
   <title>МЕГА БОНУСКА</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
     body {
-      margin: 0;
-      padding: 0;
+      margin: 0; padding: 0;
       font-family: 'Arial Black', sans-serif;
-      background: #111;
-      color: #fff;
+      background: #111; color: #fff;
       text-align: center;
     }
     h1 {
-      margin-top: 20px;
+      margin: 20px 0 10px;
       font-size: 28px;
       color: gold;
     }
     #chances {
       font-size: 20px;
-      margin-bottom: 10px;
+      margin-bottom: 20px;
     }
     .slot-container {
       position: relative;
-      width: 280px;
-      height: 150px;           /* 3 слота по 50px */
-      margin: 20px auto;
+      width: 280px; height: 150px;  /* ровно 3 слота по 50px */
+      margin: 0 auto;
       overflow: hidden;
       border: 4px solid gold;
       border-radius: 10px;
@@ -36,11 +33,9 @@
     }
     .arrow {
       position: absolute;
-      top: 50%;
-      right: -35px;
+      top: 50%; right: -35px;
       transform: translateY(-50%) rotate(180deg);
-      font-size: 50px;
-      color: gold;
+      font-size: 50px; color: gold;
       animation: blink 1s infinite;
       z-index: 10;
     }
@@ -50,20 +45,20 @@
     }
     .reel {
       position: absolute;
-      top: 0;
+      top: 0; left: 0;
       width: 100%;
     }
     .slot-item {
-      height: 50px;
-      line-height: 50px;
+      height: 50px; line-height: 50px;
       font-size: 18px;
       background: #333;
       border-top: 1px solid #444;
     }
     button {
-      font-size: 20px;
+      display: inline-block;
+      margin: 20px 10px 0;
       padding: 10px 25px;
-      margin-top: 20px;
+      font-size: 20px;
       border: none;
       border-radius: 8px;
       background: green;
@@ -75,7 +70,7 @@
       display: none;
     }
     #promo-text {
-      margin-top: 20px;
+      margin: 20px 0;
       color: #32cd32;
       font-size: 18px;
       display: none;
@@ -83,14 +78,12 @@
     .fireworks {
       position: fixed;
       top: 0; left: 0;
-      width: 100vw;
-      height: 100vh;
+      width: 100vw; height: 100vh;
       pointer-events: none;
       z-index: 9999;
     }
     .fireworks canvas {
-      width: 100%;
-      height: 100%;
+      width: 100%; height: 100%;
       display: block;
     }
   </style>
@@ -126,9 +119,10 @@
       "50 FP"
     ];
     const guaranteedPrize = "ШАНС Х2";
-    const fullRotations   = 4;
-    const slotHeight      = 50;
-    const visibleIndex    = 1; // второй слот (0,1,2)
+
+    const fullRotations    = 4;
+    const slotHeight       = 50;
+    const visibleSlotIndex = 1; // второй слот (0,1,2)
 
     const reel       = document.getElementById("reel");
     const spinBtn    = document.getElementById("spinBtn");
@@ -139,30 +133,30 @@
 
     // Fireworks-js
     const fw = new Fireworks.default(fwEl, {
-      autoresize: true,
-      opacity: 0.9,
-      acceleration: 1.1,
-      friction: 0.95,
-      gravity: 1.5,
-      particles: 480,
-      trace: 6,
-      explosion: 6,
-      intensity: 60,
-      brightness: { min: 60, max: 90 },
-      decay: { min: 0.01, max: 0.02 }
+      autoresize: true, opacity: 0.9, acceleration: 1.1, friction: 0.95,
+      gravity: 1.5, particles: 480, trace: 6, explosion: 6, intensity: 60,
+      brightness: { min: 60, max: 90 }, decay: { min: 0.01, max: 0.02 }
     });
 
-    // Генерация ленты: 4 оборота рандомных призов + гарантированный ШАНС Х2
+    // Показать 3 первых призa до старта
+    function initReel() {
+      reel.innerHTML = "";
+      for (let i = 0; i < 3; i++) {
+        const div = document.createElement("div");
+        div.className = "slot-item";
+        div.innerText = allPrizes[i % allPrizes.length];
+        reel.appendChild(div);
+      }
+    }
+    initReel();
+
+    // Собирает fullRotations полных оборотов + GUARANTEE
     function buildReel() {
       const prizes = [];
-      const count = fullRotations * allPrizes.length + visibleIndex + 1;
-      for (let i = 0; i < count - 1; i++) {
-        // берём рандомный приз для динамики
-        prizes.push(allPrizes[Math.floor(Math.random() * allPrizes.length)]);
+      for (let r = 0; r < fullRotations; r++) {
+        prizes.push(...allPrizes);
       }
-      // добавляем гарант
       prizes.push(guaranteedPrize);
-
       reel.innerHTML = "";
       prizes.forEach(p => {
         const div = document.createElement("div");
@@ -173,33 +167,24 @@
       return prizes.length - 1;
     }
 
-    // Инициализация: показываем первые 3 элемента
-    (function init() {
-      const idx = buildReel();
-      // сразу сбрасываем позицию
-      reel.style.transition = "none";
-      reel.style.transform = "translateY(0)";
-    })();
-
     spinBtn.onclick = () => {
       if (+attemptsEl.innerText <= 0) return;
       spinBtn.disabled = true;
 
-      // перестраиваем ленту заново
+      // 1) перестраиваем барабан
       const targetIndex = buildReel();
-      // сброс CSS
+      // 2) сброс позиции перед анимацией
       reel.style.transition = "none";
       reel.style.transform  = "translateY(0)";
-      // заставляем браузер применить
+      // принудительный reflow
       void reel.offsetWidth;
-
-      // рассчитываем смещение так, чтобы гарантированный приз оказался во 2-м слоте
-      const offset = -(targetIndex - visibleIndex) * slotHeight;
-
-      // анимируем 10 секунд
+      // 3) вычисляем offset: visibleSlotIndex*slotHeight — targetIndex*slotHeight
+      const offset = (visibleSlotIndex - targetIndex) * slotHeight;
+      // 4) анимация
       reel.style.transition = "transform 10s cubic-bezier(0.2,0.9,0.3,1)";
       reel.style.transform  = `translateY(${offset}px)`;
 
+      // 5) по завершении
       setTimeout(() => {
         fw.start();
         claimBtn.style.display  = "inline-block";
